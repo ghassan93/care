@@ -29,6 +29,19 @@ class Customer(models.Model):
         on_delete=models.CASCADE,
         related_name='customer'
     )
+    @property
+    def name(self):
+        """
+        Returns the full name of the user.
+        """
+        return f"{self.user.first_name} {self.user.last_name}"
+
+    @property
+    def email(self):
+        """
+        Returns the email of the user.
+        """
+        return self.user.email
 
     class Meta:
         ordering = ['-id']

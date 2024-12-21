@@ -79,6 +79,7 @@ urlpatterns = [
     path('notifications/', views.notification_view, name='notification_view'),
     path('notifications/settings/', views.notification_settings_view, name='notification_settings_view'),
     path('notifications/send/<str:role>/', views.notification_messages_view, name='notification_messages_view'),
+    path('send-marketing-email/', views.send_marketing_email_view, name='send_marketing_email_view'),
 
 ]
 

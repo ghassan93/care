@@ -33,6 +33,8 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
+#to test send marketing messages by email
+TESTING_EMAIL_MODE=True
 # This mail is used to send all error messages that occur in the system when DEBUG is False
 ADMINS = [(env("ADMIN_NAME"), env("ADMIN_EMAIL"))]
 

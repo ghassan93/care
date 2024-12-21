@@ -17,12 +17,67 @@ from customerapp import models as customer_model
 from . import serializers, models
 from .filtres import OrderFilter, UserFilter, VendorFilter, InvoiceFilter, OfferFilter, ServiceFilter, CityFilter, \
     PoliciesFilter, TagFilter, CommentFilter
+    
+from django.shortcuts import render
+from customerapp.models import Customer
+from .tasks import send_marketing_email_task
+from project import settings
+import os
+from django.core.files.storage import default_storage
 
 """
  ============================================================== 
      Django View Application for display Pages in website
  ============================================================== 
 """
+
+
+def send_marketing_email_view(request):
+    if request.method == 'POST':
+        subject = request.POST.get('subject')
+        message = request.POST.get('message')
+        attachments = request.FILES.getlist('attachments')
+
+        upload_folder = os.path.join(settings.MEDIA_ROOT, 'attachments')
+        os.makedirs(upload_folder, exist_ok=True)  # 
+
+        attachment_data = []
+        for attachment in attachments:
+            file_path = os.path.join(upload_folder, attachment.name)
+            with default_storage.open(file_path, 'wb+') as destination:
+                for chunk in attachment.chunks():
+                    destination.write(chunk)
+
+            attachment_data.append({
+                'name': attachment.name,
+                'url': f"{settings.MEDIA_URL}attachments/{attachment.name}",
+                'content_type': attachment.content_type
+            })
+
+        customers = Customer.objects.all()
+        for customer in customers:
+            context = {
+                'subject': subject,
+                'message': message,
+                'name': customer.name,
+                'attachments': attachment_data  
+            }
+            template_name = 'care/email/marketing_email.html'
+            recipient_list = ['garabeed@gmail.com'] if settings.TESTING_EMAIL_MODE else [customer.email]
+
+            send_marketing_email_task.delay(
+                subject=subject,
+                recipient_list=recipient_list,
+                context=context,
+                template_name=template_name
+            )
+    return render(request, 'care/email/send_email.html')
+
+
+
+
+
+
 
 USER_MODEL = get_user_model()
 
