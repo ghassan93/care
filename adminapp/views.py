@@ -32,6 +32,8 @@ from django.core.files.storage import default_storage
 """
 
 
+from django.shortcuts import render
+
 def send_marketing_email_view(request):
     if request.method == 'POST':
         subject = request.POST.get('subject')
@@ -39,7 +41,7 @@ def send_marketing_email_view(request):
         attachments = request.FILES.getlist('attachments')
 
         upload_folder = os.path.join(settings.MEDIA_ROOT, 'attachments')
-        os.makedirs(upload_folder, exist_ok=True)  # 
+        os.makedirs(upload_folder, exist_ok=True)
 
         attachment_data = []
         for attachment in attachments:
@@ -60,7 +62,7 @@ def send_marketing_email_view(request):
                 'subject': subject,
                 'message': message,
                 'name': customer.name,
-                'attachments': attachment_data  
+                'attachments': attachment_data
             }
             template_name = 'care/email/marketing_email.html'
             recipient_list = ['garabeed@gmail.com'] if settings.TESTING_EMAIL_MODE else [customer.email]
@@ -71,11 +73,17 @@ def send_marketing_email_view(request):
                 context=context,
                 template_name=template_name
             )
+
+        # عرض الصفحة بعد النجاح
+        return render(request, 'care/email/sendSuccess.html')
+
     return render(request, 'care/email/send_email.html')
 
 
 
 
+def test(request):
+    return render(request, 'care/email/marketing_email.html')
 
 
 
